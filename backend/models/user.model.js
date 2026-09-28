@@ -4,7 +4,7 @@ const userSchema = new Schema({
     username: {
         type: String,
         unique: [true, "username already taken"],
-        required: true,
+        required: [true, 'username is required'],
         trim: true,
         minlength: 3,
         maxlength: 16
