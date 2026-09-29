@@ -50,7 +50,8 @@ async function registerUserController(req, res) {
                 id: user._id,
                 username: user.username,
                 email: user.email
-            }
+            },
+            token
         })
 
 
@@ -74,13 +75,13 @@ async function loginUserController(req, res) {
 
         const {email, password} = req.body
 
-        if(!username || password){
+        if(!email || !password){
             return res.status(400).json({
-                message: "Provide the required fields username and password"
+                message: "Provide the required fields email and password"
             })
         }
 
-    const user = await userModel.findOne({email})
+    const user = await userModel.findOne({email}).select('+password')
 
     if(!user){
         return res.status(400).json({

@@ -25,9 +25,9 @@ const userSchema = new Schema({
         select: false,
     },
 
-    createdAt: {
-        timestamps: true
-    }
+    // createdAt: {
+    //     timestamps: true
+    // }
 
 
     
