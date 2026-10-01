@@ -1,4 +1,5 @@
 import '../auth.form.scss'
+import { Link } from 'react-router-dom'
 
 export default function Login() {
 
@@ -26,6 +27,9 @@ export default function Login() {
           </button>
 
        </form>
+
+              <p>Dont have an account? <Link to={"/register"} className='authLink'>Register</Link></p>
+
       </div>
     </main>
   )

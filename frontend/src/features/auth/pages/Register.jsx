@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom"
+
 export default function Register() {
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -27,6 +29,8 @@ export default function Register() {
           </button>
 
        </form>
+
+       <p>Already have an account? <Link to={"/login"} className="authLink">Login</Link></p>
       </div>
     </main>
   )
