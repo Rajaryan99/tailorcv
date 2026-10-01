@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import blacklistModel from "../models/blacklist.model.js"
 
 /**
  * @name registerUserController
@@ -85,7 +86,7 @@ async function loginUserController(req, res) {
 
     if(!user){
         return res.status(400).json({
-            message: "User does not exist. Please register first"
+            message: "Invalid email or password"
         })
     }
 
@@ -126,4 +127,59 @@ async function loginUserController(req, res) {
 
 }
 
-export default { registerUserController, loginUserController };
+
+/**
+ * @name logoutUserController
+ * @description logout and clear token cookie and add to blacklist
+ * @access Public
+ */
+
+
+async function logoutUserController(req, res){
+    try {
+
+        const token  = req.cookies.token;
+        console.log(token)
+
+        if(token){
+            await blacklistModel.create({token})
+        }
+
+        res.clearCookie("token")
+
+        res.status(200).json({
+            message: "User logged out successfully"
+        })
+
+        
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            message: "Error while logging out user"
+        })
+    }
+}
+
+
+/**
+ * @name getMeController
+ * @description get the current user detaild
+ * @access Private
+ */
+
+async function getMeController(req, res) {
+    try {
+
+
+        
+    } catch (error) {
+
+         console.error(error)
+        res.status(500).json({
+            message:"Error while getting current user details:"
+        })
+        
+    }
+}
+
+export default { registerUserController, loginUserController, logoutUserController, getMeController};
