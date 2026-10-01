@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
+import blacklistModel from '../models/blacklist.model.js';
 
-function authUser(req, res, next){
+async function authUser(req, res, next){
     try {
 
         const token = req.cookies.token;
@@ -10,6 +11,16 @@ function authUser(req, res, next){
                 message: "Token Not Found!!!"
             })
         }
+
+        const isTokenBlackListed = await blacklistModel.findOne({token})
+
+
+        if(isTokenBlackListed){
+            return res.status(401).json({
+                message: "Invalid Token"
+            })
+        }
+        
 
         const decode = jwt.verify(token, process.env.JWT_SECRET);
 
