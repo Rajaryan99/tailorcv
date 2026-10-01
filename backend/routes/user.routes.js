@@ -38,6 +38,7 @@ authRouter.get('/logout', authController.logoutUserController)
  * @access Private
  */
 
-authRouter.get('/get-me', authUser, authController.getMeController)
+authRouter.get('/get-me', authUser, authController.getMeController) 
+
 
 export default authRouter;

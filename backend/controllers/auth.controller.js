@@ -175,7 +175,14 @@ async function getMeController(req, res) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        res.status(200).json({ user });
+        res.status(200).json({ 
+            message: "User details fetched successfully", 
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email
+            }
+         });
     } catch (error) {
 
          console.error(error)
