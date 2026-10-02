@@ -1,6 +1,17 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 export default function Register() {
+
+  const navigate  = useNavigate()
+
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+
+
   const handleSubmit = (e) => {
     e.preventDefault()
   }
@@ -13,15 +24,21 @@ export default function Register() {
 
             <div className="inputGroup">
             <label htmlFor="username">Username</label>
-            <input type="username" id="username" placeholder="Enter your username" />
+            <input
+            onChange={(e) => {setUsername(e.target.value)}}
+             type="username" id="username" placeholder="Enter your username" />
           </div>
           <div className="inputGroup">
             <label htmlFor="email">Email</label>
-            <input type="email" id="email" placeholder="Enter email address" />
+            <input
+            onChange={(e) => {setEmail(e.target.value)}}
+             type="email" id="email" placeholder="Enter email address" />
           </div>
           <div className="inputGroup">
             <label htmlFor="password">Password</label>
-            <input type="password" id="password" placeholder="Enter password" />
+            <input
+            onChange={(e) => {setPassword(e.target.value)}}
+             type="password" id="password" placeholder="Enter password" />
           </div>
 
           <button className="button primary-button">
