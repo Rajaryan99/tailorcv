@@ -4,6 +4,10 @@ import connectDB from './db/db.js';
 import authRouter from './routes/user.routes.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
+import {resume, selfDescription, jobDescription} from './services/temp.js'
+import {generateInterviewReport} from './services/ai.service.js'
+
+
 
 const app = express();
 
@@ -14,6 +18,7 @@ app.use(cors({
 	credentials: true
 }))
 
+generateInterviewReport({resume, selfDescription, jobDescription})
 const port = process.env.PORT || 3000
 
 app.get('/',(req, res) => {
