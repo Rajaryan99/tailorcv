@@ -45,9 +45,11 @@ export async function generateInterviewReport({resume, selfDescription, jobDescr
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                responseJsonSchema: zodToJsonSchema(interviewReportSchema)
+                responseSchema: zodToJsonSchema(interviewReportSchema)
             }
         })
+
+        return JSON.parse(response.text)
 
         console.log(JSON.parse(response.text))
     } catch (error) {
@@ -56,4 +58,4 @@ export async function generateInterviewReport({resume, selfDescription, jobDescr
     
 }
 
-// export default {generateInterviewReport}
+export default generateInterviewReport

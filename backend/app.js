@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors'
 import {resume, selfDescription, jobDescription} from './services/temp.js'
 import {generateInterviewReport} from './services/ai.service.js'
+import interviewRouter from './routes/interview.routes.js'
 
 
 
@@ -18,7 +19,7 @@ app.use(cors({
 	credentials: true
 }))
 
-generateInterviewReport({resume, selfDescription, jobDescription})
+// generateInterviewReport({resume, selfDescription, jobDescription})
 const port = process.env.PORT || 3000
 
 app.get('/',(req, res) => {
@@ -29,6 +30,8 @@ app.get('/',(req, res) => {
 
 
 app.use('/api/auth', authRouter )
+app.use('/api/interview', interviewRouter )
+
 
 app.listen(port,() => {
 
