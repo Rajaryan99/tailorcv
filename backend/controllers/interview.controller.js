@@ -91,4 +91,32 @@ async function generateInterviewReportController(req, res) {
     }
 }
 
-export default { generateInterviewReportController };
+
+/**
+ * 
+ * @desc Controller to get an interview report by interviewId.
+ */
+
+
+async function getInterviewReportByIdController(req, res) {
+    try{
+
+        const {id} = req.params;
+        const interviewReport = await interviewReportModel.findById(id);
+
+        if (!interviewReport) {
+            return res.status(404).json({ message: 'Interview report not found' });
+        }
+
+        return res.status(200).json({
+            message: 'Interview Report Retrieved Successfully',
+            interviewReport,
+        });
+
+    } catch (error) {
+        console.error('Error in getInterviewReportByIdController:', error);
+        return res.status(500).json({ message: 'error in getInterviewReportByIdController' });
+    }
+}
+
+export default { generateInterviewReportController, getInterviewReportByIdController };
