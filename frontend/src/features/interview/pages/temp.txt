@@ -1,0 +1,139 @@
+{
+  _id: ObjectId('6ac29a3df765225e00a9dddf'),
+
+  matchScore: NumberInt('92'),
+  technicalQuestion: [
+    {
+      question: 'Can you explain how React\'s virtual DOM works and how hooks like useMemo and useCallback help optimize performance?',
+      intention: 'To assess the candidate\'s core understanding of React rendering mechanics, reconciliation, and memory/performance management.',
+      answer: 'Explain that the virtual DOM is an in-memory representation of real DOM elements. When state changes, React creates a new virtual DOM tree, diffs it with the previous one (reconciliation), and updates only the altered nodes in the actual DOM. Mention that useMemo caches the result of expensive computations across re-renders, while useCallback caches function definitions to prevent unnecessary child re-renders when passing callbacks down to memoized components.'
+    },
+    {
+      question: 'How does the JavaScript Event Loop manage asynchronous tasks, microtasks, and macrotasks?',
+      intention: 'To test foundational JavaScript runtime knowledge and understanding of asynchronous execution order.',
+      answer: 'Describe the call stack, Web APIs, callback/macrotask queue (setTimeout, setInterval, I/O), and microtask queue (Promises, queueMicrotask, MutationObserver). Emphasize that the event loop checks if the call stack is empty; once empty, all tasks in the microtask queue run to completion before processing the next macrotask.'
+    },
+    {
+      question: 'How do you securely handle JWT authentication between a React client and an Express backend?',
+      intention: 'To evaluate full-stack security practices, token storage, and session handling.',
+      answer: 'Explain the full authentication flow: the client sends credentials, the backend validates them, generates signed JWTs (access token and refresh token), and sends them back. Highlight best practices such as storing refresh tokens in HttpOnly, Secure, SameSite cookies to protect against XSS, and keeping short-lived access tokens in memory or auth context. Mention using Axios/fetch interceptors to catch 401 errors and automatically refresh access tokens.'
+    },
+    {
+      question: 'What strategies do you use for efficient data fetching, caching, and handling loading and error states in React applications?',
+      intention: 'To assess frontend architectural patterns and user experience considerations during network interactions.',
+      answer: 'Discuss patterns such as using custom hooks or libraries like TanStack Query/SWR to manage caching, background refetching, and deduping requests. Detail the implementation of explicit UI states: initial loading skeletons, success states, empty states, and fallback error boundaries with retry mechanisms. Also mention AbortController for cleaning up pending requests when components unmount.'
+    },
+    {
+      question: 'In your QueryGPT and GitHub Clone projects, how did you model MongoDB relationships and optimize queries?',
+      intention: 'To test database schema design skills and query performance awareness in full-stack contexts.',
+      answer: 'Walk through schema design choices: referencing using ObjectId versus embedding subdocuments. For example, in QueryGPT, embedding messages within chat sessions for fast retrieval versus referencing users in repositories in the GitHub clone. Discuss creating proper indexes on frequently queried fields like userId and repositoryId, using projection to return only needed fields, and employing lean queries in Mongoose to improve read performance.'
+    }
+  ],
+  behaviouralQuestion: [
+    {
+      question: 'Describe a difficult bug you encountered in a full-stack project and the methodology you used to resolve it.',
+      intention: 'To assess debugging skills, systematic problem-solving approach, and persistence under pressure.',
+      answer: 'Structure the answer using the STAR method. Detail the specific bug (e.g., a WebRTC signaling failure or CORS/token issue), explain the isolation process using browser dev tools, network inspection, and backend server logs, explain the root cause identified, and conclude with the fix implemented alongside preventative steps like regression testing or error logging.'
+    },
+    {
+      question: 'How do you balance rapid feature delivery with code quality and clean architecture when working independently or under tight deadlines?',
+      intention: 'To evaluate prioritization, architectural discipline, and pragmatic technical trade-offs.',
+      answer: 'Explain your approach to breaking features into MVP increments. Highlight the practice of writing modular, reusable components and clean API contracts upfront to prevent technical debt. Mention using linting, TypeScript interfaces, and focused testing early, and setting aside time for refactoring once core requirements are validated.'
+    },
+    {
+      question: 'Can you share an experience where you had to quickly learn a new technology or API to complete a project?',
+      intention: 'To measure adaptability, self-directed learning ability, and enthusiasm for technology.',
+      answer: 'Highlight a relevant experience, such as learning WebRTC/Socket.IO for SeeYou or LLM integrations for QueryGPT. Detail the learning curve: reading official documentation, building minimal proof-of-concept prototypes, handling edge cases, and delivering a functional, integrated solution within the project timeline.'
+    }
+  ],
+  skillGaps: [
+    {
+      skill: 'Automated Unit and Integration Testing (Jest, React Testing Library, Supertest)',
+      severity: 'medium'
+    },
+    {
+      skill: 'CSS Preprocessors and Modern CSS Frameworks (Tailwind CSS, Styled Components)',
+      severity: 'low'
+    },
+    {
+      skill: 'Web Performance Optimization and Core Web Vitals profiling',
+      severity: 'medium'
+    }
+  ],
+  preparationPlan: [
+    {
+      day: NumberInt('1'),
+      focus: 'Core JavaScript and Asynchronous Programming Mastery',
+      tasks: [
+        'Review closures, prototypes, event bubbling, and hoisting in JavaScript.',
+        'Implement custom implementations of Promise, Promise.all, debounce, and throttle.',
+        'Solve 3-5 medium level coding challenges focusing on array and object transformations.'
+      ],
+      _id: ObjectId('6ac29a3df765225e00a9dde0')
+    },
+    {
+      day: NumberInt('2'),
+      focus: 'React Architecture, Hooks, and Component Patterns',
+      tasks: [
+        'Deep dive into React rendering cycles, fiber architecture, and reconciliation.',
+        'Practice building custom hooks for API calls, local storage synchronization, and window resizing.',
+        'Review optimization patterns using React.memo, useMemo, and useCallback.'
+      ],
+      _id: ObjectId('6ac29a3df765225e00a9dde1')
+    },
+    {
+      day: NumberInt('3'),
+      focus: 'Responsive Frontend Design, HTML5, and Modern CSS',
+      tasks: [
+        'Review CSS Flexbox and CSS Grid layout algorithms and complex alignment properties.',
+        'Build a fully responsive dashboard component using pure CSS or Tailwind CSS.',
+        'Audit frontend accessibility (semantic HTML, ARIA attributes, keyboard navigation).'
+      ],
+      _id: ObjectId('6ac29a3df765225e00a9dde2')
+    },
+    {
+      day: NumberInt('4'),
+      focus: 'Node.js, Express, and RESTful API Architecture',
+      tasks: [
+        'Build a secure Express boilerplate featuring JWT authentication, rate limiting, and centralized error handling middleware.',
+        'Review HTTP status codes, REST conventions, and CORS configuration.',
+        'Practice schema design and query indexing in MongoDB using Mongoose.'
+      ],
+      _id: ObjectId('6ac29a3df765225e00a9dde3')
+    },
+    {
+      day: NumberInt('5'),
+      focus: 'Frontend Testing and Web Performance Optimization',
+      tasks: [
+        'Write unit tests for React components using React Testing Library and Jest.',
+        'Practice code-splitting with React.lazy and Suspense.',
+        'Analyze a personal project using Chrome DevTools Lighthouse to optimize LCP, FID, and CLS.'
+      ],
+      _id: ObjectId('6ac29a3df765225e00a9dde4')
+    },
+    {
+      day: NumberInt('6'),
+      focus: 'Project Deep-Dive and Architecture Walkthroughs',
+      tasks: [
+        'Prepare detailed architecture explanations for QueryGPT, the GitHub Clone, and SeeYou.',
+        'Document key technical hurdles faced during WebRTC signaling and OpenAI API streaming.',
+        'Review Git workflows, branching strategies, and CI/CD deployment pipelines.'
+      ],
+      _id: ObjectId('6ac29a3df765225e00a9dde5')
+    },
+    {
+      day: NumberInt('7'),
+      focus: 'Behavioral Questions and Comprehensive Mock Interviews',
+      tasks: [
+        'Formulate answers for behavioral questions using the STAR framework.',
+        'Conduct a timed mock technical interview addressing system design and live coding.',
+        'Review resume bullet points, personal pitch, and formulate questions for the hiring team.'
+      ],
+      _id: ObjectId('6ac29a3df765225e00a9dde6')
+    }
+  ],
+  user: ObjectId('6abbe2c6678137e0e6bf05ed'),
+  createdAt: ISODate('2026-10-04T18:26:05.326Z'),
+  updatedAt: ISODate('2026-10-04T18:26:05.326Z'),
+  __v: NumberInt('0')
+}
