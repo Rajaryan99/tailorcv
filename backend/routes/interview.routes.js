@@ -31,6 +31,7 @@ interviewRouter.get('/report/:id', authUser, resumeUpload, interviewController.g
  */
 
 interviewRouter.get('/', authUser, interviewController.getAllInterviewReportsController)
- 
+
+interviewRouter.delete('/:id', authUser, interviewController.deleteInterviewReportController)
 
 export default interviewRouter;

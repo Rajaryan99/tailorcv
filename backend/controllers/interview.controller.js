@@ -6,6 +6,10 @@ export function getUploadedResume(req) {
     return req.file ?? req.files?.resume?.[0] ?? req.files?.file?.[0] ?? req.files?.cv?.[0] ?? null;
 }
 
+function resolveUserId(req) {
+    return req?.user?.id ?? req?.user?._id ?? null;
+}
+
 function normalizeInterviewReport(report = {}) {
     return {
         matchScore: report.matchingScore ?? report.matchScore ?? 0,
@@ -50,6 +54,12 @@ async function generateInterviewReportController(req, res) {
             });
         }
 
+        const userId = resolveUserId(req);
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+
         let resumeText = '';
 
         if (uploadedResume) {
@@ -79,7 +89,7 @@ async function generateInterviewReportController(req, res) {
         const interviewReport = await interviewReportModel.create({
             ...normalizeInterviewReport(interviewReportByAi),
             title: interviewReportByAi.title || jobDescription,
-            user: req.user?.id,
+            user: userId,
             resume: resumeText,
             selfDescription,
             jobDescription,
@@ -127,8 +137,16 @@ async function getInterviewReportByIdController(req, res) {
 
 async function getAllInterviewReportsController(req, res) {
     try {
-        const userId = req.user?.id;
-        const interviewReports = await interviewReportModel.find({ user: userId }).sort({ createdAt: -1 }).select("-resume -selfDescription -jobDescription -__v -technicalQuestion -behaviouralQuestion -skillGaps -preparationPlan");
+        const userId = resolveUserId(req);
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+
+        const interviewReports = await interviewReportModel
+            .find({ user: userId })
+            .sort({ createdAt: -1 })
+            .select('_id title createdAt');
 
         return res.status(200).json({
             message: 'All Interview Reports Retrieved Successfully',
@@ -140,4 +158,29 @@ async function getAllInterviewReportsController(req, res) {
     }
 }
 
-export default { generateInterviewReportController, getInterviewReportByIdController , getAllInterviewReportsController };
+async function deleteInterviewReportController(req, res) {
+    try {
+        const { id } = req.params;
+        const userId = resolveUserId(req);
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+
+        const deletedReport = await interviewReportModel.findOneAndDelete({ _id: id, user: userId });
+
+        if (!deletedReport) {
+            return res.status(404).json({ message: 'Interview report not found' });
+        }
+
+        return res.status(200).json({
+            message: 'Interview report deleted successfully',
+            deletedReport,
+        });
+    } catch (error) {
+        console.error('Error in deleteInterviewReportController:', error);
+        return res.status(500).json({ message: 'error in deleteInterviewReportController' });
+    }
+}
+
+export default { generateInterviewReportController, getInterviewReportByIdController , getAllInterviewReportsController, deleteInterviewReportController };
