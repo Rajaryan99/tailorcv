@@ -23,6 +23,14 @@ interviewRouter.post('/', authUser, resumeUpload, interviewController.generateIn
 
 interviewRouter.get('/report/:id', authUser, resumeUpload, interviewController.getInterviewReportByIdController)
 
+
+/**
+ * @route GET /api/interview
+ * @desc Get all interview reports for the authenticated user.
+ * @access Private  
+ */
+
+interviewRouter.get('/', authUser, interviewController.getAllInterviewReportsController)
  
 
 export default interviewRouter;

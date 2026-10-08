@@ -44,22 +44,26 @@ async function generateInterviewReportController(req, res) {
         const { selfDescription, jobDescription } = req.body || {};
         const uploadedResume = getUploadedResume(req);
 
-        if (!uploadedResume) {
-            return res.status(400).json({ message: 'Resume PDF is required' });
-        }
-
         if (!selfDescription || !jobDescription) {
             return res.status(400).json({
                 message: 'Self description and job description are required',
             });
         }
 
-        const pdfParser = new PDFParse({ data: uploadedResume.buffer });
-        const resumeContent = await pdfParser.getText();
-        const resumeText = resumeContent?.text?.trim() || '';
+        let resumeText = '';
+
+        if (uploadedResume) {
+            const pdfParser = new PDFParse({ data: uploadedResume.buffer });
+            const pdfContent = await pdfParser.getText();
+            resumeText = pdfContent?.text?.trim() || '';
+        } else {
+            resumeText = selfDescription.trim();
+        }
 
         if (!resumeText) {
-            return res.status(400).json({ message: 'Unable to read text from the uploaded PDF' });
+            return res.status(400).json({
+                message: 'Resume PDF or self description text is required',
+            });
         }
 
         const interviewReportByAi = await generateInterviewReport({
@@ -74,6 +78,7 @@ async function generateInterviewReportController(req, res) {
 
         const interviewReport = await interviewReportModel.create({
             ...normalizeInterviewReport(interviewReportByAi),
+            title: interviewReportByAi.title || jobDescription,
             user: req.user?.id,
             resume: resumeText,
             selfDescription,
@@ -119,4 +124,20 @@ async function getInterviewReportByIdController(req, res) {
     }
 }
 
-export default { generateInterviewReportController, getInterviewReportByIdController };
+
+async function getAllInterviewReportsController(req, res) {
+    try {
+        const userId = req.user?.id;
+        const interviewReports = await interviewReportModel.find({ user: userId }).sort({ createdAt: -1 }).select("-resume -selfDescription -jobDescription -__v -technicalQuestion -behaviouralQuestion -skillGaps -preparationPlan");
+
+        return res.status(200).json({
+            message: 'All Interview Reports Retrieved Successfully',
+            interviewReports,
+        });
+    } catch (error) {
+        console.error('Error in getAllInterviewReportsController:', error);
+        return res.status(500).json({ message: 'error in getAllInterviewReportsController' });
+    }
+}
+
+export default { generateInterviewReportController, getInterviewReportByIdController , getAllInterviewReportsController };
