@@ -202,7 +202,10 @@ export async function generateResumePdf({resume, selfDescription, jobDescription
                         Return only JSON that exactly matches the provided response schema.
                         Resume: ${resume}
                         Self Description: ${selfDescription}
-                        Job Description: ${jobDescription}`
+                        Job Description: ${jobDescription}
+
+                        The content should be ATS-friendly, visually appealing, and well-structured. Include sections for contact information, summary, skills, experience, education, and any relevant projects or certifications. Use appropriate headings, bullet points, and formatting to enhance readability. Ensure that the HTML is clean and semantic.
+                        The resume should not be to lengthy, it should be 1 page and occupy full page not leave space in the bottom  when converted to pdf. Focus on quality rather then quantity and make sure to include all the relevant information that can icrease the candidate's chnage of getting shortlisted.`
 
                         const response = await ai.models.generateContent({
                             model: 'gemini-3-flash-preview',
