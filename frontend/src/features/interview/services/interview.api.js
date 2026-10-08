@@ -86,3 +86,15 @@ export const deleteInterviewReport = async (id) => {
     throw error;
   }
 } 
+
+/**
+ * @description Service to generate resume PDF based on JD and slef-description amd resume provided.
+ */
+
+export const generateResumePdf  = async ({interviewReportId}) => {
+  const response = await api.get(`/api/interview/resume/pdf/${interviewReportId}`, {
+    responseType: 'blob'
+  })
+
+  return response.data;
+}

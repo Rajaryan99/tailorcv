@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { deleteInterviewReport, getAllInterviewReports, generateInterviewReport, getInterviewReportById } from '../services/interview.api.js'
+import { deleteInterviewReport, getAllInterviewReports, generateInterviewReport, getInterviewReportById, generateResumePdf } from '../services/interview.api.js'
 import { InterviewContext } from '../interview.context.jsx'
 import {useParams} from 'react-router-dom'
 import { useEffect } from 'react'
@@ -85,6 +85,28 @@ export default function useInterviewForm() {
     }
   };
 
+  const getResumePdf = async (interviewReportId) => {
+    setLoading(true)
+
+    try {
+      const response = await generateResumePdf({ interviewReportId })
+      const url = window.URL.createObjectURL(new Blob([response], { type: 'application/pdf' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `resume_${interviewReportId}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      return true
+    } catch (error) {
+      console.error('Error while generating pdf in userInterview hook.js', error)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const deleteReport = async (reportId) => {
     try {
       await deleteInterviewReport(reportId);
@@ -115,6 +137,8 @@ useEffect(() => {
     deleteReport,
     loading,
     report,
-    reports
+    reports,
+    getResumePdf
+
   }
 }
