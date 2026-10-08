@@ -40,6 +40,6 @@ interviewRouter.delete('/:id', authUser, interviewController.deleteInterviewRepo
  * @access Private
  */
  
-interviewRouter.post ('/resume/pdf/:interviewReportId', authUser, interviewController.generateResumePdfController)
+interviewRouter.get('/resume/pdf/:interviewReportId', authUser, interviewController.generateResumePdfController)
 
 export default interviewRouter;
