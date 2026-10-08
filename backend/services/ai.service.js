@@ -7,36 +7,46 @@ const ai = new GoogleGenAI({
 
 export function createFallbackInterviewReport({ resume = '', selfDescription = '', jobDescription = '' }) {
     const text = `${resume} ${selfDescription} ${jobDescription}`.toLowerCase();
-    const containsReact = text.includes('react');
-    const containsNode = text.includes('node');
-    const containsMongo = text.includes('mongodb');
-    const containsJs = text.includes('javascript') || text.includes('js');
+    const detectedSkills = [
+        { key: 'react', label: 'React', weight: 20 },
+        { key: 'node', label: 'Node.js', weight: 18 },
+        { key: 'mongodb', label: 'MongoDB', weight: 16 },
+        { key: 'javascript', label: 'JavaScript', weight: 18 },
+        { key: 'typescript', label: 'TypeScript', weight: 17 },
+        { key: 'python', label: 'Python', weight: 15 },
+        { key: 'sql', label: 'SQL', weight: 15 },
+        { key: 'aws', label: 'AWS', weight: 14 },
+        { key: 'docker', label: 'Docker', weight: 12 },
+    ].filter(({ key }) => text.includes(key));
 
-    const matchScore = Math.min(96, Math.max(72, (
-        (containsReact ? 22 : 0) +
-        (containsNode ? 20 : 0) +
-        (containsMongo ? 14 : 0) +
-        (containsJs ? 18 : 0) +
-        18
-    )));
+    const skillNames = detectedSkills.map(({ label }) => label);
+    const matchScore = Math.min(96, Math.max(62, detectedSkills.reduce((total, skill) => total + skill.weight, 18)));
 
     const title = (jobDescription || 'Frontend / Full Stack Developer').split(/\n|\.|:/)[0].trim() || 'Frontend / Full Stack Developer';
 
     const technicalQuestions = [
         {
-            question: 'Can you explain how React renders and updates the UI efficiently?',
-            intention: 'Assess understanding of rendering, virtual DOM, reconciliation, and performance optimization.',
-            answer: 'Explain the virtual DOM, component re-rendering, reconciliation, and when to use memoization with useMemo and useCallback.'
+            question: skillNames.includes('React')
+                ? 'Can you explain how React renders and updates the UI efficiently?'
+                : 'How do you structure a robust front-end application for maintainability and performance?',
+            intention: 'Assess understanding of rendering, component design, and performance optimization.',
+            answer: skillNames.includes('React')
+                ? 'Explain the virtual DOM, component re-rendering, reconciliation, and when to use memoization with useMemo and useCallback.'
+                : 'Discuss component boundaries, state design, reusable hooks, and performance profiling for a scalable UI.'
         },
         {
-            question: 'How do you structure a REST API in Express.js and secure it?',
+            question: skillNames.includes('Node.js')
+                ? 'How do you structure a REST API in Express.js and secure it?'
+                : 'How would you design an API layer that is reliable, testable, and easy to extend?',
             intention: 'Check backend design knowledge and API security understanding.',
             answer: 'Describe route setup, controllers, middleware, validation, JWT auth, input validation, and handling errors with proper status codes.'
         },
         {
-            question: 'How would you connect a React frontend to MongoDB through a Node backend?',
-            intention: 'Evaluate end-to-end full stack architecture awareness.',
-            answer: 'Explain using Express routes, Mongoose models, DTO validation, CRUD logic, and secure API calls from the frontend with async requests.'
+            question: skillNames.includes('MongoDB')
+                ? 'How would you connect a React frontend to MongoDB through a Node backend?'
+                : 'How would you model and query data for a production application?',
+            intention: 'Evaluate end-to-end architecture awareness.',
+            answer: 'Explain schema design, indexing, query optimization, and the flow between the client, API, and database layer.'
         },
         {
             question: 'What is the difference between frontend state and backend state, and when would you choose each?',
@@ -69,21 +79,27 @@ export function createFallbackInterviewReport({ resume = '', selfDescription = '
     ];
 
     const skillGaps = [
-        { skill: 'Advanced system design', severity: 'medium' },
+        { skill: skillNames.length ? `Deepening ${skillNames[0]} expertise` : 'Advanced system design', severity: 'medium' },
         { skill: 'Production deployment optimization', severity: 'medium' },
         { skill: 'Testing and debugging automation', severity: 'low' }
     ];
 
+    const focusAreas = skillNames.length > 0 ? skillNames.slice(0, 3) : ['Core web fundamentals', 'API design', 'Interview readiness'];
+
     const preparationPlan = Array.from({ length: 7 }, (_, index) => ({
         day: index + 1,
-        focus: index < 2 ? 'Core frontend and JavaScript fundamentals' : index < 4 ? 'Backend API and database workflows' : 'Project polish and interview readiness',
+        focus: index < 2
+            ? `Strengthen ${focusAreas[0] || 'front-end'} fundamentals`
+            : index < 4
+                ? `Practice ${focusAreas[1] || 'backend'} architecture and APIs`
+                : `Polish ${focusAreas[2] || 'system design'} and interview readiness`,
         tasks: [
-            'Review key JavaScript concepts and practice mini exercises.',
-            'Build or refactor a small React component using hooks and state.',
+            'Review key concepts and practice targeted exercises.',
+            'Build or refactor a small feature using the relevant tech stack.',
             'Practice API integration and error handling in a demo app.',
-            'Create a small Express route and connect it to MongoDB.',
+            'Create or improve a small project tied to the job requirements.',
             'Refine your resume and portfolio projects for clarity.',
-            'Prepare answers for common frontend and full-stack interview questions.',
+            'Prepare answers for common technical and behavioral questions.',
             'Do a final mock interview and review project walkthroughs.'
         ]
     }));
@@ -131,22 +147,30 @@ export async function generateInterviewReport({resume, selfDescription, jobDescr
                         Self Description: ${selfDescription}
                         Job Description: ${jobDescription}`
 
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseJsonSchema: z.toJSONSchema(interviewReportSchema)
-            }
-        })
+    const modelCandidates = ['gemini-3.8-flash', 'gemini-2.5-flash-lite', 'gemini-1.5-flash'];
 
-        const report = JSON.parse(response.text)
-        return interviewReportSchema.parse(report)
-    } catch (error) {
-        console.error("Error generating interview report, using fallback data:", error);
-        return createFallbackInterviewReport({ resume, selfDescription, jobDescription });
+    for (const model of modelCandidates) {
+        try {
+            const response = await ai.models.generateContent({
+                model,
+                contents: prompt,
+                config: {
+                    responseMimeType: 'application/json',
+                    responseJsonSchema: z.toJSONSchema(interviewReportSchema)
+                }
+            });
+
+            const candidateText = response.text || '';
+            const cleanText = candidateText.replace(/```json|```/g, '').trim();
+            const report = JSON.parse(cleanText);
+            return interviewReportSchema.parse(report);
+        } catch (error) {
+            console.warn(`Gemini model ${model} failed, trying the next available model if any:`, error?.message || error);
+        }
     }
+
+    console.error('Error generating interview report, using fallback data.');
+    return createFallbackInterviewReport({ resume, selfDescription, jobDescription });
 }
 
 export default generateInterviewReport
