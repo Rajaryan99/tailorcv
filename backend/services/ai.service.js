@@ -1,9 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import * as z from 'zod'
+import puppeteer from 'puppeteer';
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
 });
+
+
 
 export function createFallbackInterviewReport({ resume = '', selfDescription = '', jobDescription = '' }) {
     const text = `${resume} ${selfDescription} ${jobDescription}`.toLowerCase();
@@ -173,4 +176,58 @@ export async function generateInterviewReport({resume, selfDescription, jobDescr
     return createFallbackInterviewReport({ resume, selfDescription, jobDescription });
 }
 
-export default generateInterviewReport
+
+export async function generatePdfFromHtml(htmlContent) {
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+    await browser.close();
+    return pdfBuffer;
+}
+
+
+export async function generateResumePdf({resume, selfDescription, jobDescription}) {
+
+    try{
+
+
+    const resumePdfSchema = z.object({
+        html: z.string().describe("The HTML content of the resume PDF."),
+
+    })
+
+    const prompt = `Generate a professional resume  in HTML format for a candidate based on the following information.
+                        Return only JSON that exactly matches the provided response schema.
+                        Resume: ${resume}
+                        Self Description: ${selfDescription}
+                        Job Description: ${jobDescription}`
+
+                        const response = await ai.models.generateContent({
+                            model: 'gemini-3-flash-preview',
+                            contents: prompt,
+                            config: {
+                                responseMimeType: 'application/json',
+                                responseJsonSchema: z.toJSONSchema(resumePdfSchema)
+                            }
+                        });
+
+                        const jsonContent =  JSON.parse(response.text || '{}');
+
+                        const pdfBuffer = await generatePdfFromHtml(jsonContent.html || '');
+                        return pdfBuffer;
+
+    } catch (error) {
+        console.error('Error generating resume PDF:', error);
+        throw error;
+    }
+
+ }
+
+
+
+   
+
+
+export default {generateInterviewReport, generateResumePdf}

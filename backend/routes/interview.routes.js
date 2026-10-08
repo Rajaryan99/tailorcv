@@ -34,4 +34,12 @@ interviewRouter.get('/', authUser, interviewController.getAllInterviewReportsCon
 
 interviewRouter.delete('/:id', authUser, interviewController.deleteInterviewReportController)
 
+/**
+ * @route GET /api/interview/resume/pdf
+ * @description Generate a PDF of the candidate's resume based on the provided resume text, self-description, and job description.
+ * @access Private
+ */
+ 
+interviewRouter.post ('/resume/pdf/:interviewReportId', authUser, interviewController.generateResumePdfController)
+
 export default interviewRouter;
