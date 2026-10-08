@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 const MAX_JOB_LENGTH = 5000
 
 export default function Home() {
-  const { form, updateField, handleFileChange, generateReport, loading } = useInterviewForm()
+  const { form, updateField, handleFileChange, generateReport, loading, reports, deleteReport } = useInterviewForm()
   const jobLength = form.jobDescription.length
 
   const [jobDescription, setJobDescription] = useState('');
@@ -44,6 +44,17 @@ export default function Home() {
   return (
     <main className='interview-page'>
       <div className='interview-shell'>
+        <div className='topbar-actions'>
+          <button type='button' className='profile-nav-button' onClick={() => navigate('/profile')}>
+            Profile
+          </button>
+           <button type='button' className='profile-nav-button' onClick={() => navigate('/login')}>
+            login
+          </button>
+        </div>
+
+        
+
         <header className='interview-header'>
           <h1>
             Create Your Custom <span>Interview</span> Plan
@@ -130,7 +141,50 @@ export default function Home() {
           </div>
         </section>
 
+        {/* recent report list */}
+        {reports.length > 0 && (
+          <section className='recent-reports'>
+            <h2>Recent Reports</h2>
+            <ul className='report-list'>
+              {reports.map((report) => (
+                <li key={report._id} className='report-item'>
+                  <div className='report-row'>
+                    <button
+                      type='button'
+                      className='report-title-button'
+                      onClick={() => navigate(`/interview/${report._id}`, { state: { report } })}
+                    >
+                      {report.title || 'Untitled Report'}
+                    </button>
+                    <button
+                      type='button'
+                      className='report-delete-button'
+                      onClick={async (event) => {
+                        event.stopPropagation();
+                        const confirmed = window.confirm('Delete this report?');
+                        if (!confirmed) return;
+
+                        try {
+                          await deleteReport(report._id);
+                        } catch (error) {
+                          alert('Failed to delete the report. Please try again.');
+                        }
+                      }}
+                      aria-label={`Delete ${report.title || 'report'}`}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <footer className='interview-footer'>
+          <button type='button' className='footer-link-button' onClick={() => navigate('/profile')}>
+            Profile
+          </button>
           <a href='#'>Privacy Policy</a>
           <a href='#'>Terms of Service</a>
           <a href='#'>Help Center</a>

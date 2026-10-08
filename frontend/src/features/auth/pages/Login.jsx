@@ -42,9 +42,13 @@ export default function Login() {
              type="password" id="password" placeholder="Enter password" />
           </div>
 
-          <button className="button primary-button">
-              login
+          <button className="button primary-button auth-submit-button">
+              Login
           </button>
+
+          <Link to="/register" className='secondary-auth-button'>
+            Sign up
+          </Link>
 
        </form>
 

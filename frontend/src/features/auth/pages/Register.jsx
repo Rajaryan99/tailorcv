@@ -53,9 +53,13 @@ export default function Register() {
              type="password" id="password" placeholder="Enter password" />
           </div>
 
-          <button className="button primary-button">
-              Register
+          <button className="button primary-button auth-submit-button">
+              Sign up
           </button>
+
+          <Link to="/login" className='secondary-auth-button'>
+            Login
+          </Link>
 
        </form>
 

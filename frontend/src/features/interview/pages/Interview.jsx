@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import '../styles/interview.scss'
 import { useInterviewContext } from '../hooks/useInterviewContext.jsx'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getInterviewReportById } from '../services/interview.api.js'
 
 // const interviewData = {
 //   matchScore: 92,
@@ -72,7 +73,26 @@ export default function Interview() {
   const [activeSection, setActiveSection] = useState('technical')
   const [expandedItems, setExpandedItems] = useState({})
   const navigate = useNavigate()
+  const { interviewId } = useParams()
   const { report, setReport } = useInterviewContext()
+
+  useEffect(() => {
+    if (!interviewId) return
+
+    const loadReport = async () => {
+      try {
+        const response = await getInterviewReportById(interviewId)
+        const fullReport = response?.interviewReport || response
+        if (fullReport) {
+          setReport(fullReport)
+        }
+      } catch (error) {
+        console.error('Error loading saved report:', error)
+      }
+    }
+
+    loadReport()
+  }, [interviewId, setReport])
 
   const handleGenerateNewReport = () => {
     setReport(null)
@@ -80,11 +100,19 @@ export default function Interview() {
     navigate('/home', { replace: true })
   }
 
+  const safeReport = report || {
+    matchScore: 0,
+    technicalQuestion: [],
+    behaviouralQuestion: [],
+    skillGaps: [],
+    preparationPlan: []
+  }
+
   const currentItems = useMemo(() => {
-    if (activeSection === 'technical') return report.technicalQuestion
-    if (activeSection === 'behavioral') return report.behaviouralQuestion
-    return report.preparationPlan
-  }, [activeSection])
+    if (activeSection === 'technical') return safeReport.technicalQuestion || []
+    if (activeSection === 'behavioral') return safeReport.behaviouralQuestion || []
+    return safeReport.preparationPlan || []
+  }, [activeSection, safeReport])
 
   const toggleItem = (index) => {
     setExpandedItems((previous) => ({
@@ -181,12 +209,12 @@ export default function Interview() {
         <aside className='report-sidebar'>
           <div className='score-box'>
             <span className='score-label'>Match Score</span>
-            <strong>{report.matchScore}%</strong>
+            <strong>{safeReport.matchScore || 0}%</strong>
           </div>
 
           <h3>Skill Gaps</h3>
           <div className='skill-gaps'>
-            {report.skillGaps.map((gap) => (
+            {(safeReport.skillGaps || []).map((gap) => (
               <span key={gap.skill} className={`skill-pill ${gap.severity}`}>
                 {gap.skill}
               </span>

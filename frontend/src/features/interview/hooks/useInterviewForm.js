@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { getAllInterviewReports, generateInterviewReport, getInterviewReportById } from '../services/interview.api.js'
+import { deleteInterviewReport, getAllInterviewReports, generateInterviewReport, getInterviewReportById } from '../services/interview.api.js'
 import { InterviewContext } from '../interview.context.jsx'
 import {useParams} from 'react-router-dom'
 import { useEffect } from 'react'
@@ -42,6 +42,12 @@ export default function useInterviewForm() {
       const generatedReport = await generateInterviewReport({jobDescription, resumeFile, selfDescription});
       const reportData = generatedReport?.interviewReport || generatedReport?.interviewReportByAi || generatedReport;
       setReport(reportData);
+      if (reportData?._id) {
+        setReports((previousReports) => [
+          { _id: reportData._id, title: reportData.title || 'Untitled Report', createdAt: reportData.createdAt || new Date().toISOString() },
+          ...previousReports.filter((item) => item?._id !== reportData._id)
+        ]);
+      }
       return generatedReport;
     } catch (error) {
       console.error('Error generating interview report:', error);
@@ -79,6 +85,17 @@ export default function useInterviewForm() {
     }
   };
 
+  const deleteReport = async (reportId) => {
+    try {
+      await deleteInterviewReport(reportId);
+      setReports((previousReports) => previousReports.filter((report) => report._id !== reportId));
+      return true;
+    } catch (error) {
+      console.error('Error deleting interview report:', error);
+      throw error;
+    }
+  };
+
 useEffect(() => {
     if(interviewId) {
       getReportById(interviewId);
@@ -95,6 +112,7 @@ useEffect(() => {
     generateReport,
     getReportById,
     getAllReports,
+    deleteReport,
     loading,
     report,
     reports
