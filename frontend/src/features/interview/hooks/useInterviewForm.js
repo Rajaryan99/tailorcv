@@ -1,6 +1,8 @@
 import { useState, useContext } from 'react'
 import { getAllInterviewReports, generateInterviewReport, getInterviewReportById } from '../services/interview.api.js'
 import { InterviewContext } from '../interview.context.jsx'
+import {useParams} from 'react-router-dom'
+import { useEffect } from 'react'
 
 const initialFormState = {
   jobDescription: '',
@@ -10,6 +12,7 @@ const initialFormState = {
 
 export default function useInterviewForm() {
   const [form, setForm] = useState(initialFormState)
+  const {interviewId} = useParams()
 
   const updateField = (field, value) => {
     setForm((previous) => ({
@@ -75,6 +78,14 @@ export default function useInterviewForm() {
       setLoading(false);
     }
   };
+
+useEffect(() => {
+    if(interviewId) {
+      getReportById(interviewId);
+    } else {
+      getAllReports();
+    }
+  }, [interviewId]);
 
   return {
     form,

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import '../styles/interview.scss'
 import { useInterviewContext } from '../hooks/useInterviewContext.jsx'
+import { useNavigate } from 'react-router-dom'
 
 // const interviewData = {
 //   matchScore: 92,
@@ -70,7 +71,14 @@ const sections = [
 export default function Interview() {
   const [activeSection, setActiveSection] = useState('technical')
   const [expandedItems, setExpandedItems] = useState({})
-  const { report } = useInterviewContext()
+  const navigate = useNavigate()
+  const { report, setReport } = useInterviewContext()
+
+  const handleGenerateNewReport = () => {
+    setReport(null)
+    window.localStorage.removeItem('tailorcv-current-report')
+    navigate('/home', { replace: true })
+  }
 
   const currentItems = useMemo(() => {
     if (activeSection === 'technical') return report.technicalQuestion
@@ -84,6 +92,12 @@ export default function Interview() {
       [`${activeSection}-${index}`]: !previous[`${activeSection}-${index}`]
     }))
   }
+
+  // useEffect(() => {
+  //   if (InterviewId) {
+  //     getInterviewReportById(InterviewId)
+  //   }
+  // }, [InterviewId])
 
   return (
     <main className='interview-report-page'>
@@ -178,6 +192,10 @@ export default function Interview() {
               </span>
             ))}
           </div>
+
+          <button type='button' className='generate-new-button' onClick={handleGenerateNewReport}>
+            Generate New Report
+          </button>
         </aside>
       </div>
     </main>

@@ -335,6 +335,27 @@
         color: #ffd3df;
       }
     }
+
+    .generate-new-button {
+      margin-top: auto;
+      width: 100%;
+      border: none;
+      border-radius: 0.8rem;
+      padding: 0.9rem 1rem;
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(90deg, #ff2d76 0%, #ff4d72 35%, #ff6b4d 100%);
+      box-shadow: 0 12px 24px rgba(255, 73, 120, 0.28);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-top: 1.5rem;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 30px rgba(255, 73, 120, 0.38);
+      }
+    }
   }
 }
 
