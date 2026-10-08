@@ -1,12 +1,45 @@
-import React from 'react'
+import React, { useState, useRef } from 'react'
 import useInterviewForm from '../hooks/useInterviewForm'
 import '../styles/home.scss'
+import { useNavigate } from 'react-router-dom'
 
 const MAX_JOB_LENGTH = 5000
 
 export default function Home() {
-  const { form, updateField, handleFileChange } = useInterviewForm()
+  const { form, updateField, handleFileChange, generateReport, loading } = useInterviewForm()
   const jobLength = form.jobDescription.length
+
+  const [jobDescription, setJobDescription] = useState('');
+  const [selfDescription, setSelfDescription] = useState('');
+  const resumeInputRef = useRef(null);
+
+  const navigate = useNavigate();
+
+
+  const handleGenerateReport = async () => {
+    const resumeFile = resumeInputRef.current?.files?.[0] || null;
+
+    if (!jobDescription.trim() || !selfDescription.trim()) {
+      alert('Please enter both the job description and your self-description.');
+      return;
+    }
+
+    try {
+      const data = await generateReport({ jobDescription, resumeFile, selfDescription });
+      const finalReport = data?.interviewReport || data?.interviewReportByAi || data;
+
+      if (!finalReport || !finalReport._id) {
+        alert('The report could not be generated right now. Please try again.');
+        return;
+      }
+
+      navigate(`/interview/${finalReport._id}`, { state: { report: finalReport } });
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Something went wrong while generating the report.';
+      alert(message);
+    }
+  }
+
 
   return (
     <main className='interview-page'>
@@ -31,7 +64,7 @@ export default function Home() {
               id='jobDescription'
               name='jobDescription'
               value={form.jobDescription}
-              onChange={(event) => updateField('jobDescription', event.target.value)}
+              onChange={(event) => {setJobDescription(event.target.value); updateField('jobDescription', event.target.value)}  }
               maxLength={MAX_JOB_LENGTH}
               placeholder='Paste the full job description here...'
             />
@@ -55,6 +88,7 @@ export default function Home() {
                 accept='.pdf,.doc,.docx'
                 hidden
                 onChange={handleFileChange}
+                ref={resumeInputRef}
               />
               <span className='upload-icon'>⬆</span>
               <span className='upload-copy'>Click to upload or drag &amp; drop</span>
@@ -68,7 +102,7 @@ export default function Home() {
               id='selfDescription'
               name='selfDescription'
               value={form.selfDescription}
-              onChange={(event) => updateField('selfDescription', event.target.value)}
+              onChange={(event) => {setSelfDescription(event.target.value); updateField('selfDescription', event.target.value)}}
               placeholder='Briefly describe your experience, key skills, and years of experience. '
             />
 
@@ -77,8 +111,21 @@ export default function Home() {
               Either a resume or a self description is required to generate a personalized plan.
             </div>
 
-            <button type='button' className='cta-button'>
-              Generate Interview Strategy
+            <button
+              type='button'
+              className={loading ? 'cta-button loading' : 'cta-button'}
+              onClick={handleGenerateReport}
+              disabled={loading}
+              aria-live='polite'
+            >
+              {loading ? (
+                <>
+                  <span className='spinner' aria-hidden='true' />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                'Generate Interview Strategy'
+              )}
             </button>
           </div>
         </section>
