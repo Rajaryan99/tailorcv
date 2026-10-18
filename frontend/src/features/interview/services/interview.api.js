@@ -12,7 +12,7 @@ export async function generateInterviewPlan(payload) {
 
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'https://tailorcv-backend-w45u.onrender.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
