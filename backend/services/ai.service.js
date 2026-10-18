@@ -178,13 +178,25 @@ export async function generateInterviewReport({resume, selfDescription, jobDescr
 
 
 export async function generatePdfFromHtml(htmlContent) {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+        ],
+    });
 
-    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
-    await browser.close();
-    return pdfBuffer;
+    try {
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+        return pdfBuffer;
+    } finally {
+        await browser.close();
+    }
 }
 
 
@@ -301,7 +313,9 @@ export async function generateResumePdf({resume, selfDescription, jobDescription
         return await generatePdfFromHtml(fallbackHtml);
     } catch (error) {
         console.error('Error generating resume PDF:', error);
-        throw error;
+
+        const fallbackHtml = buildFallbackResumeHtml({ resume, selfDescription, jobDescription });
+        return await generatePdfFromHtml(fallbackHtml);
     }
 }
 
