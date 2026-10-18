@@ -3,6 +3,18 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import blacklistModel from "../models/blacklist.model.js"
 
+const getCookieOptions = () => {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    return {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        path: '/',
+        maxAge: 24 * 60 * 60 * 1000,
+    };
+};
+
 /**
  * @name registerUserController
  * @description To register new user and assign a JWT toekn in cookies
@@ -43,9 +55,9 @@ async function registerUserController(req, res) {
             {expiresIn: '1d'}
         )
 
-        res.cookie("token", token)
+        res.cookie("token", token, getCookieOptions())
 
-        res.status(201).json({
+        return res.status(201).json({
             message: "User registered successfully",
             user: {
                 id: user._id,
@@ -105,19 +117,16 @@ async function loginUserController(req, res) {
         {expiresIn: "1d"}
     )
 
-   res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: 24 * 60 * 60 * 1000
-});
-    res.status(200).json({
+    res.cookie("token", token, getCookieOptions());
+
+    return res.status(200).json({
         message: "User logiedIn successfully.",
         user: {
             id: user._id,
             email: user.email,
             username: user.username
-        }
+        },
+        token
     })
 
 

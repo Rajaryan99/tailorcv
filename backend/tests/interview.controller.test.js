@@ -2,9 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import jwt from 'jsonwebtoken';
 import interviewController, { getUploadedResume } from '../controllers/interview.controller.js';
+import authController from '../controllers/auth.controller.js';
 import { authUser } from '../middlewares/auth.middleware.js';
 import blacklistModel from '../models/blacklist.model.js';
 import interviewReportModel from '../models/interviewReport.model.js';
+import userModel from '../models/user.model.js';
+import bcrypt from 'bcrypt';
 
 test('getUploadedResume accepts a file uploaded under the legacy file field name', () => {
   const uploadedFile = { originalname: 'resume.pdf', buffer: Buffer.from('pdf') };
@@ -36,6 +39,52 @@ test('generateInterviewReportController rejects a request with no text input or 
 
   assert.equal(res.statusCode, 400);
   assert.equal(res.payload.message, 'Self description and job description are required');
+});
+
+test('loginUserController returns the JWT in the response body for client fallback auth', async () => {
+  const previousSecret = process.env.JWT_SECRET;
+  const previousFindOne = userModel.findOne;
+  const previousCompare = bcrypt.compare;
+  process.env.JWT_SECRET = 'test-secret';
+
+  userModel.findOne = () => ({
+    select: async () => ({
+      _id: 'user-123',
+      email: 'test@example.com',
+      username: 'tester',
+      password: 'hashed-password',
+    }),
+  });
+  bcrypt.compare = async () => true;
+
+  const req = {
+    body: { email: 'test@example.com', password: 'password123' },
+  };
+  const res = {
+    statusCode: 200,
+    cookie() {},
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(payload) {
+      this.payload = payload;
+      return this;
+    },
+  };
+
+  try {
+    await authController.loginUserController(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.ok(res.payload.token, 'token should be returned to the client');
+    assert.equal(res.payload.user.email, 'test@example.com');
+  } finally {
+    userModel.findOne = previousFindOne;
+    bcrypt.compare = previousCompare;
+    if (previousSecret === undefined) delete process.env.JWT_SECRET;
+    else process.env.JWT_SECRET = previousSecret;
+  }
 });
 
 test('authUser rejects expired JWT tokens with a 401 response', async () => {
