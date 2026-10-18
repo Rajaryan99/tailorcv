@@ -1,10 +1,11 @@
 import axios from 'axios'
 
 const TOKEN_STORAGE_KEY = 'tailorcv_token';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://tailorcv-backend-w45u.onrender.com';
 
 const api = axios.create({
-    baseURL: 'https://tailorcv-backend-w45u.onrender.com',
-    withCredentials: true
+    baseURL: API_BASE_URL,
+    withCredentials: true,
 })
 
 const setAuthToken = (token) => {
@@ -18,8 +19,20 @@ const setAuthToken = (token) => {
     delete api.defaults.headers.common.Authorization;
 };
 
-api.interceptors.request.use((config) => {
+const syncAuthToken = () => {
     const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+
+    if (storedToken) {
+        api.defaults.headers.common.Authorization = `Bearer ${storedToken}`;
+        return storedToken;
+    }
+
+    delete api.defaults.headers.common.Authorization;
+    return null;
+};
+
+api.interceptors.request.use((config) => {
+    const storedToken = syncAuthToken();
 
     if (storedToken && !config.headers.Authorization) {
         config.headers.Authorization = `Bearer ${storedToken}`;
@@ -27,6 +40,17 @@ api.interceptors.request.use((config) => {
 
     return config;
 });
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error?.response?.status === 401) {
+            setAuthToken(null);
+        }
+
+        return Promise.reject(error);
+    }
+);
 
 export async function register({username, email, password}){
     try {

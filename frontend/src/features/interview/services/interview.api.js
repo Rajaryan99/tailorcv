@@ -1,26 +1,41 @@
 import axios from 'axios'
 
-export async function generateInterviewPlan(payload) {
-  console.info('UI-only mode: interview API not connected yet.', payload)
-
-  return {
-    success: true,
-    message: 'UI preview only - backend wiring pending.'
-  }
-}
-
-
+const TOKEN_STORAGE_KEY = 'tailorcv_token';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://tailorcv-backend-w45u.onrender.com';
 
 const api = axios.create({
-  baseURL: 'https://tailorcv-backend-w45u.onrender.com',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
+const setAuthToken = (token) => {
+  if (token) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    return;
+  }
+
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  delete api.defaults.headers.common.Authorization;
+};
+
+const syncAuthToken = () => {
+  const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+
+  if (storedToken) {
+    api.defaults.headers.common.Authorization = `Bearer ${storedToken}`;
+    return storedToken;
+  }
+
+  delete api.defaults.headers.common.Authorization;
+  return null;
+};
+
 api.interceptors.request.use((config) => {
-  const storedToken = localStorage.getItem('tailorcv_token');
+  const storedToken = syncAuthToken();
 
   if (storedToken && !config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${storedToken}`;
@@ -28,6 +43,17 @@ api.interceptors.request.use((config) => {
 
   return config;
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      setAuthToken(null);
+    }
+
+    return Promise.reject(error);
+  }
+)
 
 /**
  * @desc Generate an interview report based on the candidate's resume, self-description, and job description.
