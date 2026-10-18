@@ -19,6 +19,16 @@ const api = axios.create({
   }
 })
 
+api.interceptors.request.use((config) => {
+  const storedToken = localStorage.getItem('tailorcv_token');
+
+  if (storedToken && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${storedToken}`;
+  }
+
+  return config;
+})
+
 /**
  * @desc Generate an interview report based on the candidate's resume, self-description, and job description.
  */
